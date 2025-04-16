@@ -29,8 +29,16 @@ class BackendPanelProvider extends PanelProvider
             ->path('backend')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Stone,
             ])
+            ->font('Poppins')
+            ->brandName(config('app.name'))
+            ->darkModeBrandLogo(asset('images/logo-light.png'))
+            ->brandLogoHeight('3rem')
+            ->favicon(asset('images/favicon.png'))
+
+            ->brandLogo(asset('images/logo-dark.png'))
+            ->favicon(asset('images/logo-dark.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

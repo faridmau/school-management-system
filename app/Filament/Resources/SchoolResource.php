@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @School Management System
+ * @license MIT
+ * @link https://faridmau.com
+ * @author faridmau
+ * @github https://github.com/faridmau/school-management-system
+ * @license https://opensource.org/licenses/MIT
+ */
 namespace App\Filament\Resources;
 
 use Filament\Forms;
@@ -24,7 +32,7 @@ class SchoolResource extends Resource
 {
     protected static ?string $model = School::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     public static function form(Form $form): Form
     {
