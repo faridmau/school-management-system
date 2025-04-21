@@ -2,16 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EmployeeResource\Pages;
-use App\Filament\Resources\EmployeeResource\RelationManagers;
-use App\Models\Employee;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Employee;
+use Filament\Forms\Form;
+use App\Enums\StatusEnum;
 use Filament\Tables\Table;
+use App\Models\Lookup\Country;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\EmployeeResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\EmployeeResource\RelationManagers;
 
 class EmployeeResource extends Resource
 {
@@ -23,74 +26,95 @@ class EmployeeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('active'),
-                Forms\Components\TextInput::make('phone_number')
-                    ->tel()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('address')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('city')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('state')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('zip_code')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('country')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('region')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('latitude')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('longitude')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('position')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('employee_code')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('emergency_contact_name')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('emergency_contact_phone')
-                    ->tel()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('emergency_contact_relationship')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('medical_conditions')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('allergies')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('special_needs')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('salary')
-                    ->numeric(),
-                Forms\Components\TextInput::make('bank_account_number')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('bank_name')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('bank_branch')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('tax_id')
-                    ->maxLength(255),
-                Forms\Components\DatePicker::make('hire_date'),
-                Forms\Components\TextInput::make('notes')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('social_media_links'),
-                Forms\Components\TextInput::make('updated_by')
-                    ->numeric(),
-                Forms\Components\TextInput::make('created_by')
-                    ->numeric(),
+
+                Section::make(__('Basic Information'))
+                    ->description('Basic information about the employee')
+                    ->schema([
+                        Forms\Components\TextInput::make('employee_code')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Select::make('status')
+                            ->required()
+                            ->options(StatusEnum::class)
+                            ->label(__('Status'))
+                            ->default(StatusEnum::ACTIVE->value),
+                        Forms\Components\TextInput::make('password')
+                            ->password()
+                            ->required()
+                            ->revealable()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('password_confirmation')
+                            ->password()
+                            ->required()
+                            ->revealable()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('position')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('phone_number')
+                            ->tel()
+                            ->maxLength(255),
+                    ])->columns(2),
+                Section::make(__('Address Information'))
+                    ->description('Address information about the employee')
+                    ->schema([
+                        Forms\Components\Textarea::make('address')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('city')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('state')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('zip_code')
+                            ->maxLength(255),
+                        Forms\Components\Select::make('country')
+                            ->required()
+                            ->options(Country::all()->pluck('name', 'code_2'))
+                            ->searchable()
+                            ->placeholder('Select a country'),
+                        Forms\Components\TextInput::make('region')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('latitude')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('longitude')
+                            ->maxLength(255),
+                    ])->columns(2),
+
+
+                Section::make(__('Additional Information'))
+                    ->schema([
+                        Forms\Components\TextInput::make('emergency_contact_name')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('emergency_contact_phone')
+                            ->tel()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('emergency_contact_relationship')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('medical_conditions')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('allergies')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('special_needs')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('salary')
+                            ->numeric(),
+                        Forms\Components\TextInput::make('bank_account_number')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('bank_name')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('bank_branch')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('tax_id')
+                            ->maxLength(255),
+                        Forms\Components\DatePicker::make('hire_date'),
+                        Forms\Components\TextInput::make('notes')
+                            ->maxLength(255),
+                    ])->columns(2),
             ]);
     }
 
