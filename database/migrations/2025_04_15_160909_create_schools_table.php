@@ -14,24 +14,15 @@ return new class extends Migration
         Schema::create('schools', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug')->unique(); // unique slug for the school
             $table->text('about')->nullable();
             $table->text('vision')->nullable();
             $table->text('mission')->nullable();
-            $table->text('address');
-            $table->string('city');
-            $table->string('state');
-            $table->string('zip_code');
-            $table->string('country')->nullable(); // default country
-            $table->string('region')->nullable(); // e.g., Northeast, Midwest
-            $table->string('latitude')->nullable(); // latitude for geolocation
-            $table->string('longitude')->nullable(); // longitude for geolocation
             $table->string('timezone')->default('UTC'); // default timezone
             $table->string('phone_number')->nullable();
             $table->string('email')->nullable();
             $table->string('website')->nullable();
             $table->string('type')->nullable(); // e.g., public, private, charter
-            $table->string('district')->nullable();
-            $table->integer('enrollment')->nullable(); // number of students enrolled
             $table->string('school_code')->unique()->nullable(); // unique identifier for the school
             $table->string('status')->default('active'); // e.g., active, inactive
             $table->string('accreditation')->nullable(); // accreditation status

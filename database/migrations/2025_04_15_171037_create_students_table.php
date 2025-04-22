@@ -13,21 +13,11 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete(); // foreign key to schools table
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete(); // foreign key to schools table
-            $table->string('name');
-            $table->string('gender')->nullable();
+            $table->string('gender');
             $table->date('date_of_birth')->nullable();
-            $table->string('email')->unique();
             $table->string('phone_number')->nullable();
-            $table->text('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
-            $table->string('zip_code')->nullable();
-            $table->string('country')->nullable();
-            $table->string('region')->nullable();
-            $table->string('latitude')->nullable();
-            $table->string('longitude')->nullable();
-            $table->string('grade')->nullable(); // e.g., 1st, 2nd, 3rd
             $table->string('enrollment_status')->default('active'); // e.g., active, inactive
             $table->string('student_code')->unique()->nullable(); // unique identifier for the student
             $table->string('emergency_contact_name')->nullable();

@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\HasAddress;
 use Spatie\Image\Enums\Fit;
+use Spatie\Sluggable\HasSlug;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\MediaLibrary\HasMedia;
+
 class School extends Model implements HasMedia
 {
-
+    use HasAddress;
+    use HasSlug;
     use InteractsWithMedia;
     protected $table = 'schools';
     protected $casts = [
@@ -28,6 +33,15 @@ class School extends Model implements HasMedia
                 $model->updated_by = auth()->id();
             });
         }
+    }
+    /**
+     * Get the options for generating the slug.
+     */
+    public function getSlugOptions() : SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug');
     }
     public function registerMediaConversions(?Media $media = null): void
     {

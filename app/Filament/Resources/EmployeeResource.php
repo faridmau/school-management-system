@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\EmployeeResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\EmployeeResource\RelationManagers;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class EmployeeResource extends Resource
 {
@@ -30,10 +31,11 @@ class EmployeeResource extends Resource
                 Section::make(__('Basic Information'))
                     ->description('Basic information about the employee')
                     ->schema([
-                        Forms\Components\TextInput::make('employee_code')
-                            ->maxLength(255),
                         Forms\Components\TextInput::make('name')
                             ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('employee_code')
+                            ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         Forms\Components\TextInput::make('email')
                             ->email()
@@ -60,6 +62,10 @@ class EmployeeResource extends Resource
                         Forms\Components\TextInput::make('phone_number')
                             ->tel()
                             ->maxLength(255),
+                        SpatieMediaLibraryFileUpload::make('profile_picture')
+                            ->image()
+                            ->collection('profile_pictures')
+                            ->label(__('Profile Picture'))
                     ])->columns(2),
                 Section::make(__('Address Information'))
                     ->description('Address information about the employee')
@@ -85,7 +91,26 @@ class EmployeeResource extends Resource
                             ->maxLength(255),
                     ])->columns(2),
 
-
+                Section::make(__('Financial Information'))
+                    ->description('Financial information about the employee')
+                    ->schema([
+                        Forms\Components\TextInput::make('salary')
+                            ->numeric(),
+                        Forms\Components\TextInput::make('bank_account_number')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('bank_name')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('bank_branch')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('tax_id')
+                            ->maxLength(255),
+                        Forms\Components\DatePicker::make('hire_date')
+                            ->native(false)
+                            ->label(__('Hire Date'))
+                            ->placeholder('Select a date')
+                            ->maxDate(now())
+                            ->default(now()),
+                    ])->columns(2),
                 Section::make(__('Additional Information'))
                     ->schema([
                         Forms\Components\TextInput::make('emergency_contact_name')
@@ -101,17 +126,7 @@ class EmployeeResource extends Resource
                             ->maxLength(255),
                         Forms\Components\TextInput::make('special_needs')
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('salary')
-                            ->numeric(),
-                        Forms\Components\TextInput::make('bank_account_number')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('bank_name')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('bank_branch')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('tax_id')
-                            ->maxLength(255),
-                        Forms\Components\DatePicker::make('hire_date'),
+
                         Forms\Components\TextInput::make('notes')
                             ->maxLength(255),
                     ])->columns(2),
