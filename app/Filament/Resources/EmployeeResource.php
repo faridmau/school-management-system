@@ -8,13 +8,10 @@ use App\Models\Employee;
 use Filament\Forms\Form;
 use App\Enums\StatusEnum;
 use Filament\Tables\Table;
-use App\Models\Lookup\Country;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\EmployeeResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\EmployeeResource\RelationManagers;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class EmployeeResource extends Resource
@@ -27,10 +24,17 @@ class EmployeeResource extends Resource
     {
         return $form
             ->schema([
-
                 Section::make(__('Basic Information'))
                     ->description('Basic information about the employee')
                     ->schema([
+                        Select::make('schools')
+                            ->relationship('schools', 'name')
+                            ->label(__('Schools'))
+                            ->required()
+                            ->searchable()
+                            ->multiple()
+                            ->preload()
+                            ->placeholder('Select a school'),
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
@@ -38,8 +42,15 @@ class EmployeeResource extends Resource
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         Forms\Components\TextInput::make('email')
+                            ->rules(function($record){
+                                return [
+                                    'required',
+                                    'email',
+                                    \Illuminate\Validation\Rule::unique('users', 'email')->ignore($record?->user_id),
+                                ];
+                            })
+                            ->label(__('Email'))
                             ->email()
-                            ->required()
                             ->maxLength(255),
                         Forms\Components\Select::make('status')
                             ->required()
@@ -47,49 +58,33 @@ class EmployeeResource extends Resource
                             ->label(__('Status'))
                             ->default(StatusEnum::ACTIVE->value),
                         Forms\Components\TextInput::make('password')
+                            ->rule(\Illuminate\Validation\Rules\Password::default())
+                            ->revealable()
+                            ->confirmed()
                             ->password()
-                            ->required()
+                            ->required(fn ($record) => ! $record)
                             ->revealable()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('password_confirmation')
+                            ->revealable()
                             ->password()
-                            ->required()
+                            ->required(fn ($record) => ! $record)
                             ->revealable()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('position')
                             ->maxLength(255),
 
                         Forms\Components\TextInput::make('phone_number')
-                            ->tel()
                             ->maxLength(255),
                         SpatieMediaLibraryFileUpload::make('profile_picture')
                             ->image()
                             ->collection('profile_pictures')
-                            ->label(__('Profile Picture'))
+                            ->label(__('Profile Picture')),
+
+                        Forms\Components\Textarea::make('notes'),
+
                     ])->columns(2),
-                Section::make(__('Address Information'))
-                    ->description('Address information about the employee')
-                    ->schema([
-                        Forms\Components\Textarea::make('address')
-                            ->columnSpanFull(),
-                        Forms\Components\TextInput::make('city')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('state')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('zip_code')
-                            ->maxLength(255),
-                        Forms\Components\Select::make('country')
-                            ->required()
-                            ->options(Country::all()->pluck('name', 'code_2'))
-                            ->searchable()
-                            ->placeholder('Select a country'),
-                        Forms\Components\TextInput::make('region')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('latitude')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('longitude')
-                            ->maxLength(255),
-                    ])->columns(2),
+                ...\App\Filament\Share\AddressForm::getSchema(),
 
                 Section::make(__('Financial Information'))
                     ->description('Financial information about the employee')
@@ -111,25 +106,6 @@ class EmployeeResource extends Resource
                             ->maxDate(now())
                             ->default(now()),
                     ])->columns(2),
-                Section::make(__('Additional Information'))
-                    ->schema([
-                        Forms\Components\TextInput::make('emergency_contact_name')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('emergency_contact_phone')
-                            ->tel()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('emergency_contact_relationship')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('medical_conditions')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('allergies')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('special_needs')
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('notes')
-                            ->maxLength(255),
-                    ])->columns(2),
             ]);
     }
 
@@ -137,9 +113,6 @@ class EmployeeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')

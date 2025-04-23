@@ -20,13 +20,14 @@ use Filament\Tables\Table;
 use App\Enums\SchoolTypeEnum;
 use App\Models\Lookup\Country;
 use Filament\Resources\Resource;
+use App\Filament\Share\AddressForm;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\SchoolResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\SchoolResource\RelationManagers;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class SchoolResource extends Resource
@@ -80,54 +81,7 @@ class SchoolResource extends Resource
                             ->columnSpanFull(),
 
                     ]),
-                Section::make(__('Address'))
-                    ->relationship('address')
-                    ->columns(2)
-                    ->description(__('Address information about the school'))
-                    ->schema([
-                        Forms\Components\Textarea::make('street')
-                            ->label(__('Street Address'))
-                            ->placeholder(__('e.g., 123 Main St, Apt 4B'))
-                            ->required()
-                            ->columnSpanFull(),
-                        Forms\Components\TextInput::make('city')
-                            ->label(__('City'))
-                            ->placeholder(__('e.g., New York'))
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('state')
-                            ->label(__('State'))
-                            ->placeholder(__('e.g., NY'))
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('zip_code')
-                            ->label(__('Zip Code'))
-                            ->placeholder(__('e.g., 10001'))
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\Select::make('country')
-                            ->required()
-                            ->options(Country::all()->pluck('name', 'code_2'))
-                            ->searchable()
-                            ->placeholder('Select a country'),
-
-                        Grid::make(4)
-                            ->schema([
-                                Forms\Components\TextInput::make('region')
-                                    ->label(__('Region'))
-                                    ->placeholder(__('e.g., North America'))
-                                    ->maxLength(255)->columnSpan(2),
-                                Forms\Components\TextInput::make('latitude')
-                                    ->label(__('Latitude'))
-                                    ->placeholder(__('e.g., 40.7128'))
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('longitude')
-                                    ->label(__('Longitude'))
-                                    ->placeholder(__('e.g., -74.0060'))
-                                    ->maxLength(255),
-                            ]),
-
-                    ]),
+                ...AddressForm::getSchema(),
                 Section::make(__('Additional Information'))
                     ->columns(2)
                     ->description(__('Additional information about the school'))
@@ -159,6 +113,11 @@ class SchoolResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('city')
+                    ->limit(50)
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('state')
                     ->searchable(),
@@ -166,8 +125,7 @@ class SchoolResource extends Resource
                     ->searchable()
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+
             ])
             ->filters([
                 //

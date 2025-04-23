@@ -29,12 +29,6 @@ trait HasAddress
     {
         return $this->address?->country;
     }
-    public function setCountryAttribute($value)
-    {
-        $address = $this->address ?? $this->address()->make();
-        $address->country = $value;
-        $this->setRelation('address', $address);
-    }
 
     public function getRegionAttribute()
     {
@@ -53,16 +47,4 @@ trait HasAddress
     {
         return $this->address?->longitude;
     }
-
-
-    //     street
-    // city
-    // state
-    // zip_code
-    // country
-    // region
-    // latitude
-    // longitude
-
-
 }
